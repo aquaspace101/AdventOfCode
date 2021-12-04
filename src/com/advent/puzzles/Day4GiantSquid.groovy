@@ -9,11 +9,11 @@ class Day4GiantSquid {
 
     @EqualsAndHashCode(includeFields = true)
     @ToString
-    static class Pair {
+    static class Num {
         Integer key
         boolean value
 
-        Pair(Integer key, boolean value) {
+        Num(Integer key, boolean value) {
             this.key = key
             this.value = value
         }
@@ -28,32 +28,33 @@ class Day4GiantSquid {
     private static void puzzle() {
 
         /* transforming each bingo board values to have additional marker to hold the checked status */
-        def bingoValues = bingo.collect { new Pair(it as Integer, false) }
+        def bingoValues = bingo.collect { new Num(it as Integer, false) }
 
         /* creating the data structure for each of the bingo boards */
         def bingoBoards = bingoValues.collate(5).collate(5)
 
 
-        draw.each { drawValue ->
+        draw.each { drawNum ->
+            /* removing the winner board to reduce the iterations */
             bingoBoards.removeAll { board ->
                 boolean isCurrentBoardToBeRemoved = false
 
                 /* making the drawn number in each of the bingo boards */
                 board.each { row ->
-                    row.eachWithIndex { rowElement, index ->
-                        if (rowElement.key == drawValue) {
-                            rowElement.value = true
+                    row.eachWithIndex { num, index ->
+                        if (num.key == drawNum) {
+                            num.value = true
                         }
                     }
                 }
 
-                def rowCheck = board.any { it.findAll { Pair pair -> pair.value }.size() == 5 }
-                def columnCheck = board.transpose().any { it.findAll { Pair pair -> pair.value }.size() == 5 }
+                def rowCheck = board.any { it.findAll { Num num -> num.value }.size() == 5 }
+                def columnCheck = board.transpose().any { it.findAll { Num num -> num.value }.size() == 5 }
 
                 /* for the column or the row found with its all entries marked, calculating the sum of the unmarked entries */
                 if (rowCheck || columnCheck) {
-                    def sum = board.flatten().findAll { pair -> !(pair as Pair).value }.sum { pair -> (pair as Pair).key }
-                    println "Board: ${board} | drawnNo:${drawValue} | sum of unmarked nos:${sum} | result = (${drawValue} * ${sum}) : ${drawValue * sum}  --> winner by ${rowCheck?"row":"column"} count"
+                    def sum = board.flatten().findAll { num -> !(num as Num).value }.sum { num -> (num as Num).key }
+                    println "Board: ${board} | drawnNo:${drawNum} | sum of unmarked nos:${sum} | result = (${drawNum} * ${sum}) : ${drawNum * sum}  --> winner by ${rowCheck?"row":"column"} count"
 
                     /* marking the board for removal as it has already won at least once */
                     isCurrentBoardToBeRemoved = true
